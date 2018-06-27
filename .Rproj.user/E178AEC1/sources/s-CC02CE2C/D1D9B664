@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1530101761170.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2360510227",
+    "id" : "D1D9B664",
+    "lastKnownWriteTime" : 1530110753,
+    "last_content_update" : 1530110753252,
+    "path" : "C:/Users/mkeig/Desktop/GPS_Analysis/0626_code.R",
+    "project_path" : "0626_code.R",
+    "properties" : {
+        "cursorPosition" : "48,0",
+        "scrollLine" : "24",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
