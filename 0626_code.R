@@ -1,0 +1,163 @@
+install.packages("trackeR")
+library(maptools)
+library(ggplot2)
+library(rgdal)
+library(trackeR)
+
+field <- dir(pattern = "\\.tcx$", ".")
+
+GPSData <- NULL
+for(i in field){
+  print(paste0("...", i, "を処理しています。"))
+  walkDF <- readContainer(i,timezone="GMT")
+  WalkDFF <- fortify(walkDF)
+  WalkDFF <- subset(WalkDFF,select=c("Index","latitude","longitude","altitude","speed"))
+  nn <- nrow(WalkDFF)
+  DAT <- data.frame(matrix(i, nrow = nn, ncol = 1))
+  WalkDFF <- cbind(WalkDFF,DAT)
+  GPSData <- rbind(GPSData,WalkDFF)
+}
+
+save(GPSData, file = "GPSData.rda")
+
+
+## データの読み込み
+yacht <- read.csv("yacht.csv", header=T, fileEncoding="Shift_JIS",as.is = T)
+summary(yacht)
+
+direction <- as.matrix(cbind(yacht$longitude,yacht$latitude))
+direction <- trackAzimuth(direction)
+direction <- as.data.frame(direction)
+yacht <- yacht[-1,]
+yacht <- cbind(yacht,direction)
+View(yacht)
+
+trackAngle <- function(xy) {
+  angles <- abs(c(trackAzimuth(xy), 0) -
+                  c(0, rev(trackAzimuth(xy[nrow(xy):1, ]))))
+  angles <- ifelse(angles > 180, 360 - angles, angles)
+  angles[is.na(angles)] <- 180
+  angles[-c(1, length(angles))]
+}
+trackAngle(direction)
+
+
+install.packages("spatstat")
+library(spatstat)
+
+v <- ppp(x=(-2):2, y=3*c(0,1,2,1,0), c(-3,3), c(-1,7))
+edg <- cbind(1:4, 2:5)
+edg <- rbind(edg, c(2,4))
+letterA <- linnet(v, edges=edg)
+plot(letterA)
+
+data("chicago")
+class(chicago)
+data("swedishpines")
+class(swedishpines)
+
+
+# some arbitrary coordinates in [0,1]
+x <- runif(20)
+y <- runif(20)
+
+# the following are equivalent
+X <- ppp(x, y, c(0,1), c(0,1))
+X <- ppp(x, y)
+X <- ppp(x, y, window=owin(c(0,1),c(0,1)))
+
+chi <- as.data.frame(chicago) 
+chi <- as.ppp(chi,owin(c(60,984),c(228,1266)))
+plot(chi)
+
+xx <- list(x=c(-1.5,0,0.5,1.5),y=c(1.5,3,4.5,1.5))
+X <- lpp(xx,letterA)
+plot(X)
+class(letterA)
+
+bricks <- domain(spiders)
+plot(bricks)
+alpha <- angles.psp(as.psp(bricks))*180/pi
+
+dna <- distfun(split(chicago)$assault)
+Dna <- as.linim(dna)
+a <- sqrt(Dna)+3
+b <- eval.linim(pmin(Dna,250))
+
+plot(dna,style="colour",ribside="left",box=FALSE)
+plot(Dna,style="width", adjust=2.5)
+
+split(chicago)$assault
+plot(chicago)
+
+
+library(sp)
+# From the sp vignette
+l1 = cbind(c(1,2,3),c(3,2,2))
+l1a = cbind(l1[,1]+.05,l1[,2]+.05)
+l2 = cbind(c(1,2,3),c(1,1.5,1))
+Sl1 = Line(l1)
+Sl1a = Line(l1a)
+Sl2 = Line(l2)
+S1 = Lines(list(Sl1, Sl1a), ID="a")
+S2 = Lines(list(Sl2), ID="b")
+Sl = SpatialLines(list(S1,S2))
+
+df = data.frame(z = c(1,2), row.names=sapply(slot(Sl, "lines"), function(x) slot(x, "ID")))
+Sldf = SpatialLinesDataFrame(Sl, data = df)
+AA <- as.linnet(Sldf)
+class(AA)
+
+xc = c(1.2,1.5,2.5)
+yc = c(1.5,2.2,1.6)
+Spoints = SpatialPoints(cbind(xc, yc))
+
+plot(Sldf)
+plot(Spoints,add=TRUE)
+
+install.packages("rgeos")
+library(rgeos)
+library(maptools)
+pp <- snapPointsToLines(Spoints, Sldf)
+plot(pp,col="red",add=TRUE)
+
+
+BB <- as.ppp(pp)
+plot(pp)
+
+library(spatstat)
+data(chicago)
+class(chicago)
+plot(chicago)
+d60 <- density(unmark(chicago),60)
+
+plot(d60,style="width", adjust=2.5)
+class(chicago)
+
+v <- ppp(x=(-2):2, y=3*c(0,1,2,1,0), c(-3,3), c(-1,7))
+edg <- cbind(1:4, 2:5)
+edg <- rbind(edg, c(2,4))
+letterA <- linnet(v, edges=edg)
+class(letterA)
+xx <- list(x=c(-1.5,0,0.5,1.5), y=c(1.5,3,4.5,1.5))
+class(xx)
+
+
+class(BB)
+
+##create "lpp" "ppx"
+##point on line
+##BB[1] "linnet" "list" 
+##AA[2] "ppp"
+X <- lpp(BB, AA)
+class(X)
+##[1] "lpp" "ppx"
+plot(X)
+
+dna <- density(unmark(X),0.2)
+plot(dna,style="width", adjust=0.3)
+
+plot(letterA)
+class(letterA)
+
+
