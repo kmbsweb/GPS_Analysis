@@ -45,111 +45,37 @@ dropna_GPS$compas <- fancycut(x = dropna_GPS$direction,
                              unmatched.bucket = "範囲外")
 summary(dropna_GPS$compas)
 
+write.csv(dropna_GPS,"dropna_GPS.csv")
 
-install.packages("spatstat")
-library(spatstat)
-
-v <- ppp(x=(-2):2, y=3*c(0,1,2,1,0), c(-3,3), c(-1,7))
-edg <- cbind(1:4, 2:5)
-edg <- rbind(edg, c(2,4))
-letterA <- linnet(v, edges=edg)
-plot(letterA)
-
-data("chicago")
-class(chicago)
-data("swedishpines")
-class(swedishpines)
-
-
-# some arbitrary coordinates in [0,1]
-x <- runif(20)
-y <- runif(20)
-
-# the following are equivalent
-X <- ppp(x, y, c(0,1), c(0,1))
-X <- ppp(x, y)
-X <- ppp(x, y, window=owin(c(0,1),c(0,1)))
-
-chi <- as.data.frame(chicago) 
-chi <- as.ppp(chi,owin(c(60,984),c(228,1266)))
-plot(chi)
-
-xx <- list(x=c(-1.5,0,0.5,1.5),y=c(1.5,3,4.5,1.5))
-X <- lpp(xx,letterA)
-plot(X)
-class(letterA)
-
-bricks <- domain(spiders)
-plot(bricks)
-alpha <- angles.psp(as.psp(bricks))*180/pi
-
-dna <- distfun(split(chicago)$assault)
-Dna <- as.linim(dna)
-a <- sqrt(Dna)+3
-b <- eval.linim(pmin(Dna,250))
-
-plot(dna,style="colour",ribside="left",box=FALSE)
-plot(Dna,style="width", adjust=2.5)
-
-split(chicago)$assault
-plot(chicago)
+##Wakayama map
 
 
 library(sp)
-# From the sp vignette
-l1 = cbind(c(1,2,3),c(3,2,2))
-l1a = cbind(l1[,1]+.05,l1[,2]+.05)
-l2 = cbind(c(1,2,3),c(1,1.5,1))
-Sl1 = Line(l1)
-Sl1a = Line(l1a)
-Sl2 = Line(l2)
-S1 = Lines(list(Sl1, Sl1a), ID="a")
-S2 = Lines(list(Sl2), ID="b")
-Sl = SpatialLines(list(S1,S2))
-
-df = data.frame(z = c(1,2), row.names=sapply(slot(Sl, "lines"), function(x) slot(x, "ID")))
-Sldf = SpatialLinesDataFrame(Sl, data = df)
-AA <- as.linnet(Sldf)
-class(AA)
-
-xc = c(1.2,1.5,2.5)
-yc = c(1.5,2.2,1.6)
-Spoints = SpatialPoints(cbind(xc, yc))
-
-plot(Sldf)
-plot(Spoints,add=TRUE)
-
-install.packages("rgeos")
 library(rgeos)
 library(maptools)
-pp <- snapPointsToLines(Spoints, Sldf)
-plot(pp,col="red",add=TRUE)
-
-
-BB <- as.ppp(pp)
-plot(pp)
-
 library(spatstat)
-data(chicago)
-class(chicago)
-plot(chicago)
-d60 <- density(unmark(chicago),60)
+library(rgdal)
 
-plot(d60,style="width", adjust=2.5)
-class(chicago)
+setwd("C:/Users/mkeig/Desktop/shape")
+##spatial line data Frame
+railway <- rgdal::readOGR(".","railways")
+points <- rgdal::readOGR(".","points")
+class(points)
+AA <- as.linnet(railway)
+class(AA)
 
-v <- ppp(x=(-2):2, y=3*c(0,1,2,1,0), c(-3,3), c(-1,7))
-edg <- cbind(1:4, 2:5)
-edg <- rbind(edg, c(2,4))
-letterA <- linnet(v, edges=edg)
-class(letterA)
-xx <- list(x=c(-1.5,0,0.5,1.5), y=c(1.5,3,4.5,1.5))
-class(xx)
+##spatial point data frame
+#xc = c(1.2,1.5,2.5)
+#yc = c(1.5,2.2,1.6)
+#Spoints = SpatialPoints(cbind(xc, yc))
+#plot(Spoints)
+##get the point on line
+pp <- snapPointsToLines(points, railway)
+plot(pp,col="red")
+BB <- as.ppp(pp)
 
 
-class(BB)
-
-##create "lpp" "ppx"
+##create "lpp" "ppx" class
 ##point on line
 ##BB[1] "linnet" "list" 
 ##AA[2] "ppp"
@@ -158,10 +84,10 @@ class(X)
 ##[1] "lpp" "ppx"
 plot(X)
 
-dna <- density(unmark(X),0.2)
-plot(dna,style="width", adjust=0.3)
-
-plot(letterA)
-class(letterA)
-
-
+##smoothing kernel on network
+dna <- density(unmark(X),0.008)
+plot(AA,col="#c8c8cb",main="Kernel estimate for the points")
+plot(dna,style="width", adjust=0.9, add=TRUE)
+library(GISTools)  
+map.scale(xc = 135.45, yc=34.63, len=0.05, units = "km",subdiv = 2, 
+          sfcol = "black", ndivs = 2)
